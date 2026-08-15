@@ -1,0 +1,25 @@
+--- MySQL Database Reliability Engineering Playbook ---
+
+TOPIC: InnoDB Lock Waits and Deadlocks
+SYMPTOM: Transactions are hanging, and sys.innodb_lock_waits shows blocked queries.
+ROOT CAUSE: A transaction (the blocking_pid) holds a row or table lock that another transaction (the waiting_pid) needs. This often happens during UPDATE or DELETE operations on unindexed columns, which forces MySQL to lock all rows it scans.
+RESOLUTION STEPS:
+1. Identify the blocking process ID from sys.innodb_lock_waits.
+2. Issue the KILL command against the blocking process ID to free the lock. Example: KILL 4021;
+3. Analyze the blocking query or waiting query. If the WHERE clause filters on an unindexed column, add an index immediately to prevent future full-table locks. Example: CREATE INDEX idx_colname ON tablename(colname);
+
+TOPIC: Full Table Scans and EXPLAIN Analysis
+SYMPTOM: Queries are slow, taking longer than 2 seconds in the PROCESSLIST.
+ROOT CAUSE: The query is performing a full table scan, indicated by "type: ALL" in the EXPLAIN output.
+RESOLUTION STEPS:
+1. Run EXPLAIN on the slow query.
+2. Look at the "possible_keys" and "key" columns. If "key" is NULL, no index is being used.
+3. Identify the columns used in the WHERE clause or JOIN conditions.
+4. Create an index on those columns.
+
+TOPIC: Sleeping Connections
+SYMPTOM: PROCESSLIST shows many connections in the 'Sleep' state.
+RESOLUTION STEPS:
+1. Do not terminate sleeping connections blindly.
+2. Connection pooling (like HikariCP) intentionally keeps idle connections open in the Sleep state to avoid connection overhead.
+3. Only investigate sleeping connections if you are hitting the max_connections limit.
