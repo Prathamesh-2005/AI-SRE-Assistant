@@ -23,3 +23,29 @@ RESOLUTION STEPS:
 1. Do not terminate sleeping connections blindly.
 2. Connection pooling (like HikariCP) intentionally keeps idle connections open in the Sleep state to avoid connection overhead.
 3. Only investigate sleeping connections if you are hitting the max_connections limit.
+
+TOPIC: Orders Table Schema Reference
+TABLE: orders
+COLUMNS:
+- id (INT, PRIMARY KEY, indexed)
+- customer_id (INT, NOT NULL, NOT indexed)
+- status (VARCHAR(20), NOT NULL, NOT indexed)
+- amount (DECIMAL(10,2))
+- created_at (TIMESTAMP)
+KNOWN ISSUES:
+- Queries filtering on the status column (e.g. dashboard widgets showing "pending" orders) cause full table scans since no index exists on this column.
+- Queries filtering on the customer_id column (e.g. order history lookups) also cause full table scans for the same reason.
+- Recommended fix: CREATE INDEX idx_orders_status ON orders(status); and CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+
+TOPIC: Incident History - Orders Service
+INCIDENT-2026-03-01: Orders Dashboard Timeout
+SYMPTOM: Orders dashboard took 8+ seconds to load during peak hours.
+ROOT CAUSE: Full table scan on orders.status column. Dashboard query filtered WHERE status = 'pending' with no supporting index.
+RESOLUTION: CREATE INDEX idx_orders_status ON orders(status);
+OUTCOME: Dashboard load time reduced from 8 seconds to 40 milliseconds.
+
+INCIDENT-2026-05-14: Checkout Freeze Under Load
+SYMPTOM: Order UPDATE queries began timing out with "Lock wait timeout exceeded" during a flash sale.
+ROOT CAUSE: A long-running uncommitted transaction, caused by an application bug where a batch job was missing a COMMIT, held a row lock on the orders table and blocked checkout UPDATE queries for over 60 seconds.
+RESOLUTION: Identified the blocking process ID via sys.innodb_lock_waits, killed the stuck session, and fixed the batch job to properly commit or rollback its transactions.
+OUTCOME: No recurrence after the batch job fix was deployed.
