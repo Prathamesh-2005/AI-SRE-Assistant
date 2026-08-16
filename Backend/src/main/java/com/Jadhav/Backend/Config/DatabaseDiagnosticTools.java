@@ -172,19 +172,15 @@ public class DatabaseDiagnosticTools {
         try {
 
             String sql = """
-                SELECT
-                    waiting_pid,
-                    waiting_account,
-                    waiting_query,
-                    waiting_lock_type,
-                    waiting_lock_mode,
-                    blocking_pid,
-                    blocking_account,
-                    blocking_query,
-                    blocking_lock_type,
-                    blocking_lock_mode
-                FROM sys.innodb_lock_waits
-                """;
+    SELECT
+        waiting_pid,
+        waiting_query,
+        waiting_lock_mode,
+        blocking_pid,
+        blocking_query,
+        blocking_lock_mode
+    FROM sys.innodb_lock_waits
+    """;
 
             List<Map<String, Object>> locks =
                     jdbcTemplate.queryForList(sql);
@@ -203,9 +199,9 @@ public class DatabaseDiagnosticTools {
                         .append(lock.get("waiting_pid"))
                         .append("\n");
 
-                result.append("Waiting Account: ")
-                        .append(lock.get("waiting_account"))
-                        .append("\n");
+//                result.append("Waiting Account: ")
+//                        .append(lock.get("waiting_account"))
+//                        .append("\n");
 
                 result.append("Waiting Query: ")
                         .append(lock.get("waiting_query"))
@@ -223,9 +219,9 @@ public class DatabaseDiagnosticTools {
                         .append(lock.get("blocking_pid"))
                         .append("\n");
 
-                result.append("Blocking Account: ")
-                        .append(lock.get("blocking_account"))
-                        .append("\n");
+//                result.append("Blocking Account: ")
+//                        .append(lock.get("blocking_account"))
+//                        .append("\n");
 
                 result.append("Blocking Query: ")
                         .append(lock.get("blocking_query"))
@@ -244,11 +240,15 @@ public class DatabaseDiagnosticTools {
 
             return result.toString();
 
-        } catch (Exception e) {
+        }  catch (Exception e) {
 
-            return "Unable to check database locks: "
-                    + e.getMessage();
-        }
+        System.out.println("=== checkDatabaseLocks ERROR ===");
+        e.printStackTrace();
+        System.out.println("=================================");
+
+        return "Unable to check database locks: "
+                + e.getMessage();
+    }
     }
 
 
