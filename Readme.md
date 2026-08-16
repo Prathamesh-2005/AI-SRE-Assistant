@@ -53,6 +53,20 @@ flowchart TB
     DT -->|"live diagnostic data"| AC
     KT -->|"grounded fix pattern"| AC
     AC -->|"root-cause report"| FE
+
+    classDef userStyle fill:#F2A93B,stroke:#8A5A00,stroke-width:2px,color:#0B1220,font-weight:bold
+    classDef feStyle fill:#3B82F6,stroke:#1D4ED8,stroke-width:2px,color:#FFFFFF,font-weight:bold
+    classDef orchStyle fill:#8B5CF6,stroke:#5B21B6,stroke-width:2px,color:#FFFFFF,font-weight:bold
+    classDef toolStyle fill:#F2596B,stroke:#9F1D33,stroke-width:2px,color:#FFFFFF,font-weight:bold
+    classDef kbToolStyle fill:#33D6C0,stroke:#0F766E,stroke-width:2px,color:#0B1220,font-weight:bold
+    classDef dataStyle fill:#1E293B,stroke:#F2A93B,stroke-width:2px,color:#F2A93B,font-weight:bold
+
+    class User userStyle
+    class FE feStyle
+    class AC orchStyle
+    class DT toolStyle
+    class KT,KC kbToolStyle
+    class MySQL,Qdrant dataStyle
 ```
 
 **Tech stack**
@@ -212,7 +226,3 @@ Being upfront about the current state:
 - Live tool-execution streaming (SSE) in the frontend, replacing the current per-response tool detection
 
 ---
-
-## License
-
-MIT (or your choice)
